@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandWrite Canvas - Scriere prin Gesturi Mână</title>
+    <meta name="description"
+        content="Aplicatie web interactiva ce permite desenarea pe ecran prin gesturi ale manii detectate via webcam folosind MediaPipe Hands.">
+
+    <!-- Google Fonts pentru tipografie moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Foaia de stiluri CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Librariile MediaPipe din CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Containerul principal al aplicatiei -->
+    <main class="app-container">
+
+        <!-- Suprapunerea elementelor Video si Canvas -->
+        <div class="stage-container">
+            <!-- Elementul video pentru fluxul webcam -->
+            <video id="webcam" playsinline autoplay muted></video>
+
+            <!-- Canvas-ul principal pentru desenare si suprapunere -->
+            <canvas id="output_canvas"></canvas>
+        </div>
+
+        <!-- Bara superioara plutitoare cu stil Glassmorphism (Controale si Stare) -->
+        <header class="top-controls">
+            <div class="brand">
+                <div class="logo-icon">✨</div>
+                <div class="brand-text">
+                    <h1>HandWrite <span>Canvas</span></h1>
+                    <p class="subtitle">Scriere prin gesturi webcam</p>
+                </div>
+            </div>
+
+            <!-- Insigna pentru starea gestului in timp real -->
+            <div id="gesture-status" class="status-badge status-waiting">
+                <span class="status-dot"></span>
+                <span id="status-text">Se initializeaza camera...</span>
+            </div>
+
+            <!-- Actiuni principale -->
+            <div class="header-actions">
+
+                <button id="btn-clear" class="btn btn-danger" title="Sterge tot de pe panza">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+                    </svg>
+                    <span>Sterge Ecran</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Bara de unelte plutitoare din partea de jos -->
+        <aside class="floating-toolbar">
+
+            <!-- Paleta pentru selectarea culorilor -->
+            <div class="tool-group">
+                <label class="tool-label">Culoare Desen</label>
+                <div class="color-palette">
+                    <button class="color-btn active" data-color="#FF2A55" style="--btn-color: #FF2A55;"
+                        title="Rosu"></button>
+                    <button class="color-btn" data-color="#00E5FF" style="--btn-color: #00E5FF;"
+                        title="Cyan Neon"></button>
+                    <button class="color-btn" data-color="#00FF66" style="--btn-color: #00FF66;" title="Verde"></button>
+                    <button class="color-btn" data-color="#FFB800" style="--btn-color: #FFB800;"
+                        title="Galben Gold"></button>
+                    <button class="color-btn" data-color="#B026FF" style="--btn-color: #B026FF;"
+                        title="Mov Neon"></button>
+                    <button class="color-btn" data-color="#FFFFFF" style="--btn-color: #FFFFFF;" title="Alb"></button>
+                    <div class="custom-color-wrapper" title="Alege alta culoare">
+                        <input type="color" id="custom-color-picker" value="#FF2A55">
+                        <span class="custom-color-icon">+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Slider pentru grosimea liniei -->
+            <div class="tool-group">
+                <div class="tool-label-row">
+                    <label for="brush-size" class="tool-label">Grosime Linie</label>
+                    <span id="brush-size-val" class="tool-value">5px</span>
+                </div>
+                <input type="range" id="brush-size" min="1" max="40" value="5" step="1">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Comutatoare pentru optiuni si moduri -->
+            <div class="tool-group toggles-group">
+                <label class="toggle-control" title="Afiseaza scheletul manii pe ecran">
+                    <input type="checkbox" id="toggle-skeleton" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text">Schelet Mana</span>
+                </label>
+
+                <label class="toggle-control" title="Schimba opacitatea fundalului webcam">
+                    <input type="checkbox" id="toggle-video-bg" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text">Fundal Video</span>
+                </label>
+            </div>
+        </aside>
+
+        <!-- Ferestra modala pentru permisiuni camera sau erori -->
+        <div id="camera-error-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-icon">⚠️</div>
+                <h2>Acces la Webcam Necesar</h2>
+                <p>Aplicatia necesita acces la camera web pentru a putea detecta gesturile manii. Va rugam sa permiteti
+                    accesul la camera in browser.</p>
+                <button id="btn-retry-camera" class="btn btn-primary">Reincearca Accesul</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Scriptul principal al aplicatiei -->
+    <script src="app.js"></script>
+</body>
+
+</html>
